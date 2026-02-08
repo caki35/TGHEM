@@ -291,15 +291,8 @@ class TopoGuide():
         H0gold, H1gold = gold
         H0pred, H1pred = pred
         if self.distanceMetric=='wasserstein':
-            #keep_essential_parts  
-            # If False, only considers the finite points in the diagrams. 
-            # Otherwise, include essential parts(death values are infinite) in cost and matching computation.
-            # order determines how the matching cost is aggregated.
             # order=1  the Earth Mover’s Distance, where costs are summed linearly 
-            # order=2 would give a 2-Wasserstein (quadratic aggregation of match distances, then square-rooted).
             # internal_p specifies how to compute the distance between two such points (birth, death) or between a point and the diagonal in R2, p=2 euclidean distance
-            # Bottleneck = order = np.inf + internal_p = np.inf (or just use Gudhi’s dedicated bottleneck function).
-            # W₁ with L²: order=1, internal_p=2 (smooth and common) for machine learning training
             H0dist = gd.wasserstein.wasserstein_distance(H0pred, H0gold, order=1, internal_p=2)
             H1dist = gd.wasserstein.wasserstein_distance(H1pred, H1gold, order=1, internal_p=2)
         
@@ -370,7 +363,7 @@ class TopoGuide():
         
         # ---- GOLD ----
         n_g = len(coordinates_gold)
-        if n_g > 1:
+        if n_g >= 1:
             if self.filtrationType == 'VR':
                 homologyGold = self.VietorisRipsFiltration(coordinates_gold)
             else:
@@ -378,7 +371,7 @@ class TopoGuide():
 
         # ---- PRED ----
         n_p = len(coordinates_pred)
-        if n_p > 1:
+        if n_p >= 1:
             if self.filtrationType == 'VR':
                 homologyPred = self.VietorisRipsFiltration(coordinates_pred)
             else:
@@ -388,35 +381,6 @@ class TopoGuide():
 
         return loss
     
-    
-def tghem(pred, target, lambda_pers=0.5):
-    gt_map, gt_dot = target
-    batch_size = gt_map.shape[0]
-    
-
-    tg = TopoGuide(filtrationType = 'VR', distanceMetric='wasserstein', 
-                 epsilon=20, reduction='sum')
-    
-    loss_seg_per_img = SegmentationLoss(thresh=0.7, min_kept=15000, reduction='none')(pred, gt_map)  # (B,)
-
-    # --- compute topology-based weights (no grad) ---
-    with torch.no_grad():
-        prob = torch.sigmoid(pred.squeeze(1))              # (B,H,W), detached by no_grad
-        pred_bin = (prob >= 0.5).to(torch.uint8).cpu().numpy()  # (B,H,W) uint8 for your gf
-        topo_vals = []
-        for b in range(batch_size):
-            topo_vals.append(
-                tg(
-                    gt_dot[b].detach().cpu().numpy().astype(np.uint8),
-                    pred_bin[b].astype(np.uint8),
-                )
-            )
-        topo_vals = torch.tensor(topo_vals, dtype=loss_seg_per_img.dtype, device=pred.device)  # (B,)
-
-
-    weights = 1.0 + lambda_pers * topo_vals   # (B,)
-    loss = (weights * loss_seg_per_img).sum() / batch_size
-    return loss
     
 class TGHEM(nn.Module):
     """
@@ -451,7 +415,7 @@ class TGHEM(nn.Module):
         # Detach and binarize for topology calculation
         with torch.no_grad():
             prob = torch.sigmoid(pred_logits.squeeze(1))  # (B, H, W)
-            pred_bin = (prob > 0.5).cpu().numpy().astype(np.uint8)
+            pred_bin = (prob >= 0.5).cpu().numpy().astype(np.uint8)
             gt_dots_np = gt_dots.cpu().numpy().astype(np.uint8)
             
             for b in range(batch_size):
@@ -473,8 +437,9 @@ class TGHEM(nn.Module):
 def main():
     # Initialize
     criterion = TGHEM(
-        lambda_pers=0.5, 
-        ohem_min_kept=10000, 
+        lambda_pers=0.01, 
+        ohem_thresh=0.7,
+        ohem_min_kept=15000, 
         topo_epsilon=50
     ).cuda()
 
