@@ -8,19 +8,16 @@ This repository provides a PyTorch implementation of **TGHEM**, a loss function 
 The final loss is a **per-sample reweighted segmentation loss**:
 
 $$
-\mathcal{L}_{\text{TG-HEM}}(I^{(k)}) = w_I^{(k)} \cdot \mathcal{L}_{\text{seg}}(I^{(k)})
+\begin{aligned}
+\mathcal{L}_{\text{TG-HEM}}(I^{(k)}) &= w_I^{(k)} \cdot \mathcal{L}_{\text{seg}}(I^{(k)}) \\
+w_I^{(k)} &= 1 + \lambda \cdot \mathcal{D}_{\text{Topo}}\bigl(C_I^{(k)}, \widehat{C}_I^{(k)}\bigr)
+\end{aligned}
 $$
 
-$$
-w_I^{(k)} \;=\; 1 + \lambda \cdot \mathcal{D}_{\text{Topo}}\!\bigl(C_I^{(k)}, \widehat{C}_I^{(k)}\bigr)
-$$
-
-where \mathjaxinline{\mathcal{D}_{\text{Topo}}\!\bigl(C_I^{(k)}, \widehat{C}_I^{(k)}\bigr)} is the topology discrepancy for sample \mathjaxinline{k}, and \mathjaxinline{\mathcal{L}_{\text{seg}}(I^{(k)})} is the segmentation loss computed with OHEM as
+where $\mathcal{D}_{\text{Topo}}\bigl(C_I^{(k)}, \widehat{C}_I^{(k)}\bigr)$ is the topology discrepancy for sample $k$, and $\mathcal{L}_{\text{seg}}(I^{(k)})$ is the segmentation loss computed with OHEM as
 
 $$
-\mathcal{L}_{\text{seg}}(I^{(k)}) =
-\mathrm{DL}\bigl(Y_I^{(k)}, \widehat{Y}_I^{(k)}\bigr) +
-\sum_{q \in \texttt{HARD}_I^{(k)}} \mathrm{BCE}(q, \widehat{q})
+\mathcal{L}_{\text{seg}}(I^{(k)}) = \text{DL}\bigl(Y_I^{(k)}, \widehat{Y}_I^{(k)}\bigr) + \sum_{q \in \texttt{HARD}_I^{(k)}} \text{BCE}(q, \widehat{q})
 $$
 
 ![alt text](overview.png)
