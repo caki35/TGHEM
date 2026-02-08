@@ -8,12 +8,14 @@ This repository provides a PyTorch implementation of **TGHEM**, a loss function 
 The final loss is a **per-sample reweighted segmentation loss**:
 
 $$
-\mathcal{L}_{\text{TG-HEM}}(I^{(k)}) = w_I^{(k)} \cdot \mathcal{L}_{\text{seg}}(I^{(k)}),
-\qquad
-w_I^{(k)} = 1 + \lambda \cdot \mathcal{D}_{\text{Topo}}\!\bigl(C_I^{(k)}, \widehat{C}_I^{(k)}\bigr)
+\mathcal{L}_{\text{TG-HEM}}(I^{(k)}) = w_I^{(k)} \cdot \mathcal{L}_{\text{seg}}(I^{(k)})
 $$
 
-where $\mathcal{D}_{\text{Topo}}\!\bigl(C_I^{(k)}, \widehat{C}_I^{(k)}\bigr)$ is the topology discrepancy for sample $k$, and $\mathcal{L}_{\text{seg}}(I^{(k)})$ is the segmentation loss computed with OHEM as
+$$
+w_I^{(k)} \;=\; 1 + \lambda \cdot \mathcal{D}_{\text{Topo}}\!\bigl(C_I^{(k)}, \widehat{C}_I^{(k)}\bigr)
+$$
+
+where \mathjaxinline{\mathcal{D}_{\text{Topo}}\!\bigl(C_I^{(k)}, \widehat{C}_I^{(k)}\bigr)} is the topology discrepancy for sample \mathjaxinline{k}, and \mathjaxinline{\mathcal{L}_{\text{seg}}(I^{(k)})} is the segmentation loss computed with OHEM as
 
 $$
 \mathcal{L}_{\text{seg}}(I^{(k)}) =
