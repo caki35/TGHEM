@@ -4,7 +4,7 @@ Given a mini-batch constructed from randomly cropped regions of a training image
 and the estimated cell distributions in the regions using the Vietoris-Rips filtration, quantifies their dissimilarity via the Wasserstein distance, and increases the loss of the
 regions in proportion to this topological dissimilarity during training.
 
-This repository provides a PyTorch implementation of **TGHEM**, a loss function for **dense object detection** (e.g., crowd counting, cell segmentation) via dilated segmentation. It combines:
+This repository provides a PyTorch implementation of **TGHEM**, a loss function for **dense object detection** (e.g., cell coicounting, crowd counting) via dilated segmentation. It combines:
 
 1.  **Pixel-wise Segmentation Loss**: Dice + BCE with **Online Hard Example Mining (OHEM)**.
 2.  **Topological Reweighting**: A topological discrepancy computed between the **ground-truth point set** and **predicted component centroids** using **persistent homology** (Vietoris–Rips filtration).

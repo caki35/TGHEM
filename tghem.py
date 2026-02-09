@@ -435,6 +435,7 @@ class TGHEM(nn.Module):
         return loss
     
 def main():
+    #### Example Usage ####
     # Initialize
     criterion = TGHEM(
         lambda_pers=0.01, 
@@ -445,7 +446,7 @@ def main():
 
     # In training loop
     # pred: (B, 1, H, W) logits from model
-    # gt_map: (B, H, W) binary mask
+    # gt_map: (B, H, W) binary mask derived from gt_dots via slight dilation (for pixel-wise loss)
     # gt_dot: (B, H, W) binary mask of centroids/dots
     loss = criterion(pred, (gt_map, gt_dot))
     loss.backward()
